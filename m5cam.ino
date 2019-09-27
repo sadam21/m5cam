@@ -44,6 +44,9 @@
 #include <lwip/sockets.h>
 #include "camera.h"
 
+const char* ssid = "<ssid>";
+const char* password = "<password>";
+
 WiFiServer server(80);
 
 void serve()
@@ -128,8 +131,15 @@ void setup() {
   ESP_ERROR_CHECK(gpio_install_isr_service(0));
   pinMode(CAMERA_LED_GPIO, OUTPUT);
   digitalWrite(CAMERA_LED_GPIO, HIGH);
-  
-  WiFi.disconnect(true);
+
+  WiFi.begin(ssid, password);
+ 
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
 
   camera_config_t camera_config;
   camera_config.ledc_channel = LEDC_CHANNEL_0;
@@ -181,11 +191,10 @@ void setup() {
       return;
   }
 
-  ESP_LOGI("Starting WiFi AP m5cam");
-  WiFi.softAP("m5cam");
-
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  Serial.print("MAC address: ");
+  Serial.println(WiFi.macAddress());
 
   server.begin();
 }
